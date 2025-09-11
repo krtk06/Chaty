@@ -12,10 +12,10 @@ const app = express()
 
 await connectDB()
 
-app.post('/api/stripe',express.raw({type: 'application/json'}),stripeWebhooks   )
+app.post('/api/stripe',express.raw({type: 'application/json'}),stripeWebhooks)
 
-app.use(cors())
 app.use(express.json())
+app.use(cors())
 
 app.get('/', (req, res) => res.send('Server is Live!'))
 app.use('/api/user', userRouter)
