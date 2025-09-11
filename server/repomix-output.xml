@@ -1,0 +1,749 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+configs/db.js
+configs/imageKit.js
+configs/openai.js
+controllers/chatControllers.js
+controllers/creditController.js
+controllers/messageController.js
+controllers/userControllers.js
+controllers/webhooks.js
+middlewares/auth.js
+models/Chat.js
+models/Transaction.js
+models/user.js
+package.json
+routes/chatRoutes.js
+routes/creditRoutes.js
+routes/messageRoutes.js
+routes/userRoutes.js
+server.js
+vercel.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="configs/db.js">
+import mongoose, { mongo } from "mongoose";
+
+const connectDB = async () =>{
+    try{
+        mongoose.connection.on('connected' , ()=> console.log('Database Connected'))
+        await mongoose.connect(`${process.env.MONGODB_URL}/Chaty`)
+    } catch (error){
+        console.log(error.message)
+    }
+}
+
+
+export default connectDB;
+</file>
+
+<file path="configs/imageKit.js">
+import ImageKit from "imagekit";
+
+
+var imagekit = new ImageKit({
+    publicKey : process.env.IMAGEKIT_PUBLIC_KEY,
+    privateKey : process.env.IMAGEKIT_PRIVATE_KEY,
+    urlEndpoint : process.env.IMAGEKIT_URL_ENDPOINT
+});
+
+export default imagekit
+</file>
+
+<file path="configs/openai.js">
+import {OpenAI} from "openai";
+
+const openai = new OpenAI({
+    apiKey: process.env.GEMINI_API_KEY,
+    baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/"
+});
+
+export default openai
+</file>
+
+<file path="controllers/chatControllers.js">
+import Chat from "../models/Chat.js"
+
+
+
+export const createChat = async (req,res) =>{
+    try {
+        const userId = req.user._id
+
+        const chatData = {
+            userId,
+            messages:[],
+            name:"New Chat",
+            userName: req.user.name
+        }
+
+        await Chat.create(chatData)
+        res.json({success: true, message: "Chat Created"})
+    } catch (error) {
+        res.json({success: false, message: error.message})
+    }
+}
+
+
+
+export const getChats = async (req,res) =>{
+    try {
+        const userId = req.user._id
+        const chats = await Chat.find({userId}).sort({updatedAt: -1})
+
+
+        res.json({success: true, chats})
+    } catch (error) {
+        res.json({success: false, message: error.message})
+    }
+}
+
+
+
+
+export const deleteChat = async (req,res) =>{
+    try {
+        const userId = req.user._id
+        const {chatId} = req.body
+
+        await Chat.deleteOne({_id: chatId,userId})
+
+        res.json({success: true, message: "Chat Deleted"})
+    } catch (error) {
+        res.json({success: false, message: error.message})
+    }
+}
+</file>
+
+<file path="controllers/creditController.js">
+import Transaction from "../models/Transaction.js"
+import Stripe from 'stripe'
+
+
+const plans = [
+    {
+        _id: "basic",
+        name: "Basic",
+        price: 10,
+        credits: 100,
+        features: ['100 text generations', '50 image generations', 'Standard support', 'Access to basic models']
+    },
+    {
+        _id: "pro",
+        name: "Pro",
+        price: 20,
+        credits: 500,
+        features: ['500 text generations', '200 image generations', 'Priority support', 'Access to pro models', 'Faster response time']
+    },
+    {
+        _id: "premium",
+        name: "Premium",
+        price: 30,
+        credits: 1000,
+        features: ['1000 text generations', '500 image generations', '24/7 VIP support', 'Access to premium models', 'Dedicated account manager']
+    }
+]
+
+export const getPlans = async (req, res) => {
+    try {
+        res.json({ success: true, plans })
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY);
+
+
+export const purchasePlans = async (req, res) => {
+    try {
+        const { planId } = req.body
+        const userId = req.user._id
+        const plan = plans.find(plan => plan._id === planId)
+
+        if (!plan) {
+            return res.json({ success: false, message: "Invalid plan" })
+        }
+
+        const transaction = await Transaction.create({
+            userId: userId,
+            planId: plan._id,
+            amount: plan.price,
+            credits: plan.credits,
+            isPaid: false
+        })
+
+        const {origin} = req.headers;
+
+        const session = await stripe.checkout.sessions.create({
+            line_items: [
+                {
+                    price_data :{
+                        currency: "usd",
+                        unit_amount: plan.price*100,
+                        product_data: {
+                            name: plan.name
+                        }
+                    },
+                    quantity: 1,
+                },
+            ],
+            mode: 'payment',
+            success_url: `${origin}/loading`,
+            cancel_url: `${origin}`,
+            metadata: {transactionId: transaction._id.toString(), appId: 'Chaty'},
+            expires_at: Math.floor(Date.now() /1000) + 30 * 60,
+        });
+
+        res.json({success: true,url: session.url})
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+</file>
+
+<file path="controllers/messageController.js">
+import axios from "axios"
+import Chat from "../models/Chat.js"
+import User from "../models/user.js"
+import imagekit from "../configs/imageKit.js"
+import openai from "../configs/openai.js"
+
+
+
+export const textMessageController = async(req,res) =>{
+    try {
+        const userId = req.user._id
+
+        if(req.user.credits<1){
+            return res.json({success:false,message:"You don't have enough credits to use this feature"})
+        }
+
+        const {chatId,prompt} = req.body
+
+        const chat = await Chat.findOne({userId, _id:chatId})
+        chat.messages.push({role: "user", content: prompt, timestamp : Date.now(), isImage:false})
+
+        const {choices} = await openai.chat.completions.create({
+            model: "gemini-2.0-flash",
+            messages: [
+                {
+                    role: "user",
+                    content: prompt,
+                },
+            ],
+        });
+
+        const reply = {...choices[0].message,timestamp:Date.now(),isImage:false}
+        res.json({success:true,reply})
+
+        chat.messages.push(reply)
+        await chat.save()
+
+        await User.updateOne({_id:userId},{$inc:{credits:-1}})
+
+    } catch (error) {
+        res.json({success:false,message:error.message})
+    }
+}
+
+
+
+export const imageMessageController = async (req,res) =>{
+    try {
+        const userId = req.user._id;
+
+        if(req.user.credits<2){
+            return res.json({success:false,message:"You don't have enough credits to use this feature"})
+        }
+        const {prompt,chatId,isPublished} = req.body
+
+        const chat = await Chat.findOne({userId,_id:chatId})
+
+        chat.messages.push({
+            role: "user",
+            content: prompt, 
+            timestamp : Date.now(), 
+            isImage:false
+        });
+
+        const encodedPrompt = encodeURIComponent(prompt)
+
+        const generatedImageUrl = `${process.env.IMAGEKIT_URL_ENDPOINT}/ik-genimg-prompt-${encodedPrompt}/Chaty/${Date.now()}.png?tr=w-800,h-800`;
+        const aiImageResponse = await axios.get(generatedImageUrl, { responseType: "arraybuffer" });
+        await axios.get(generatedImageUrl,{responseType:"arraybuffer"})
+
+        const base64Image = `data:image/png;base64,${Buffer.from(aiImageResponse.data,"binary").toString('base64')}`
+
+        const uploadResponse = await imagekit.upload({
+            file: base64Image,
+            fileName: `${Date.now()}.png`,
+            folder: "Chaty"
+        })
+
+        const reply = {
+            role: 'assistant',
+            content: uploadResponse.url,
+            timestamp:Date.now(),
+            isImage:true,
+            isPublished
+        }
+        res.json({success:true,reply})
+
+        chat.messages.push(reply)
+        await chat.save()
+
+        await User.updateOne({_id:userId},{$inc:{credits:-2}})
+
+    } catch (error) {
+        res.json({success:false,message:error.message});
+    }
+}
+</file>
+
+<file path="controllers/userControllers.js">
+import User from "../models/user.js";
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
+import Chat from "../models/Chat.js";
+import ImageKit from "imagekit";
+
+const generateToken = (id) =>{
+    return jwt.sign({id},process.env.JWT_SECRET,{
+        expiresIn: '30d'
+    })
+}
+
+export const registerUser = async (req,res) =>{
+    const {name,email,password} = req.body;
+
+    try{
+        const userExists = await User.findOne({email})
+
+        if(userExists){
+            return res.json({success :false,message: "User lready exists"})
+        }
+
+        const user = await User.create({name,email,password})
+
+        const token = generateToken(user._id)
+
+        res.json({success:true, token})
+    } catch(error){
+        return res.json({success: false, message: error.message})
+    }
+}
+
+
+
+export const loginUser = async (req,res) =>{
+    const {email,password} = req.body;
+
+    try {
+        const user = await User.findOne({email})
+        if(user){
+            const isMatch = await bcrypt.compare(password,user.password)
+
+            if(isMatch){
+                const token = generateToken(user._id);
+                res.json({success:true, token})
+            }
+        }
+
+        return res.json({success: false, message: "Invalid email or password"})
+
+    } catch (error) {
+        return res.json({success: false, message: error.message})
+    }
+}
+
+
+
+export const getUser = async (req,res) =>{
+
+    try {
+        const user = req.user;
+        return res.json({success: true, user})
+
+    } catch (error) {
+        return res.json({success: false, message: error.message})
+    }
+}
+
+
+
+export const getPublishedImages = async (req,res) => {
+    try {
+        const publishedImageMessages = await Chat.aggregate([
+            {$unwind: "$messages"},
+            {
+                $match: {
+                    "messages.isImage": true,
+                    "messages.isPublished": true
+                }
+            },
+            {
+                $project: {
+                    _id:0,
+                    imageUrl: "$messages.content",
+                    userName: "$userName",
+                }
+            }
+        ])
+        res.json({success: true, images:publishedImageMessages})
+
+    } catch (error) {
+        return res.json({success: false, message: error.message})
+    }
+}
+</file>
+
+<file path="controllers/webhooks.js">
+import Stripe from 'stripe'
+import Transaction from '../models/Transaction.js';
+import User from '../models/user.js';
+
+
+export const stripeWebhooks = async (req,res) =>{
+    const stripe = new Stripe(process.env.STRIPE_WEBHOOK_SECRET)
+    const sig = req.headers["stripe-signature"]
+
+    let event;
+
+    try {
+        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET)
+
+    } catch (error) {
+        return res.status(400).send(`Webhook Error: ${error.message}`)
+    }
+
+
+    try {
+        switch (event.type) {
+            case "payment_intent.succeeded":{
+                const payment_intent = event.data.object;
+                const sessionList = await stripe.checkout.sessions.list({
+                    payment_intent: payment_intent.id,
+                })
+
+                const session = sessionList.data[0];
+                const {transactionId,appId} = session.metadata;
+
+                if(appId === 'Chatyy'){
+                    const transaction = await Transaction.findOne({
+                        _id: transactionId,
+                        isPaid: false
+                    })
+
+                    await User.updateOne({_id: transaction.userId},{$inc: {credits: transaction.credits}})
+
+                    transaction.isPaid = true;
+                    await transaction.save();
+                }else{
+                    return res.json({recieved: true,message: "Ignored event: Invalid App"})
+                }
+                break;
+            }
+            default:
+                console.log("Unhandled event type",event.type)
+                break;
+        }
+        res.json({recieved: true})
+    } catch (error) {
+        console.error("Webhook processing error:",error)
+        res.status(500).send("Internal Server Error")
+    }
+}
+</file>
+
+<file path="middlewares/auth.js">
+import jwt from 'jsonwebtoken'
+import User from '../models/user.js';
+
+
+export const protect = async (req,res,next) => {
+    let token = req.headers.authorization;
+
+    try {
+        const decoded = jwt.verify(token,process.env.JWT_SECRET)
+        const userId = decoded.id;
+
+        const user = await User.findById(userId)
+
+        if(!user){
+            return res.json({success: false, message: "Not authorized, user not found"});
+        }
+
+        req.user = user;
+        next()
+    } catch (error) {
+        res.status(401).json({success: false, message: "Not authorized, token failed"})
+
+    }
+}
+</file>
+
+<file path="models/Chat.js">
+import mongoose from 'mongoose'
+
+const ChatSchema = new mongoose.Schema({
+    userId : {type: String, ref: 'User', required: true},
+    userName : {type: String, required: true},
+    name : {type: String, required: true},
+    messages: [
+        {
+            isImage: {type: Boolean, required: true},
+            isPublished: {type: Boolean, default: false},
+            role: {type: String, required: true},
+            content: {type: String, required: true},
+            timestamp: {type: Number, required: true},
+        }
+    ]
+},{timestamps:true})
+
+
+const Chat = mongoose.model('Chat', ChatSchema)
+
+export default Chat;
+</file>
+
+<file path="models/Transaction.js">
+import mongoose from "mongoose";
+
+
+const transactionSchema = new mongoose.Schema({
+    userId: {type: mongoose.Schema.Types.ObjectId,ref:"User", required: true},
+    planId: {type: String,required:true},
+    amount: {type: Number,required:true},
+    credits: {type: Number,required:true},
+    isPaid: {type: Boolean, default: false},
+},{timestamps: true})
+
+
+const Transaction = mongoose.model('Transaction', transactionSchema);
+
+export default Transaction;
+</file>
+
+<file path="models/user.js">
+import mongoose from "mongoose";
+import bcrypt from 'bcryptjs'
+
+const userSchema = new mongoose.Schema({
+    name: {type : String, required : true},
+    email: {type : String, required : true, unique : true},
+    password: {type : String, required : true},
+    credits: {type : Number, default : 20},
+})
+
+userSchema.pre('save' , async function (next){
+    if(!this.isModified('password')){
+        return next()
+    }
+    const salt = await bcrypt.genSalt(10)
+    this.password = await bcrypt.hash(this.password, salt)
+    next();
+})
+
+const User = mongoose.model('User', userSchema);
+
+export default User;
+</file>
+
+<file path="package.json">
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "server": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.11.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "imagekit": "^6.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.0",
+    "openai": "^5.19.1",
+    "stripe": "^18.5.0",
+    "svix": "^1.76.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
+</file>
+
+<file path="routes/chatRoutes.js">
+import express from 'express'
+import { createChat, deleteChat, getChats } from '../controllers/chatControllers.js';
+import { protect } from '../middlewares/auth.js';
+
+
+
+const chatRouter = express.Router();
+
+chatRouter.get('/create',protect,createChat)
+chatRouter.get('/get',protect,getChats)
+chatRouter.post('/delete',protect,deleteChat)
+
+
+export default chatRouter
+</file>
+
+<file path="routes/creditRoutes.js">
+import express from 'express'
+import { getPlans, purchasePlans } from '../controllers/creditController.js';
+import { protect } from '../middlewares/auth.js';
+
+
+const creditRouter = express.Router();
+
+creditRouter.get('/plan', getPlans)
+creditRouter.post('/purchase', protect , purchasePlans)
+
+export default creditRouter
+</file>
+
+<file path="routes/messageRoutes.js">
+import express from 'express'
+import { protect } from '../middlewares/auth.js'
+import { imageMessageController, textMessageController } from '../controllers/messageController.js'
+
+
+const messageRouter = express.Router()
+
+messageRouter.post("/text",protect,textMessageController)
+messageRouter.post("/image",protect,imageMessageController)
+
+export default messageRouter
+</file>
+
+<file path="routes/userRoutes.js">
+import express from 'express'
+import { getPublishedImages, getUser, loginUser, registerUser } from '../controllers/userControllers.js';
+import { protect } from '../middlewares/auth.js';
+
+
+
+const userRouter = express.Router();
+
+userRouter.post('/register',registerUser)
+userRouter.post('/login', loginUser)
+userRouter.get('/data',protect,getUser)
+userRouter.get('/published-images',getPublishedImages)
+
+
+export default userRouter;
+</file>
+
+<file path="server.js">
+import express from 'express'
+import 'dotenv/config'
+import cors from 'cors'
+import connectDB from './configs/db.js'
+import userRouter from './routes/userRoutes.js'
+import chatRouter from './routes/chatRoutes.js'
+import messageRouter from './routes/messageRoutes.js'
+import creditRouter from './routes/creditRoutes.js'
+import { stripeWebhooks } from './controllers/webhooks.js'
+
+const app = express()
+
+await connectDB()
+
+app.post('/api/stripe',express.raw({type: 'application/json'}),stripeWebhooks   )
+
+app.use(cors())
+app.use(express.json())
+
+app.get('/', (req, res) => res.send('Server is Live!'))
+app.use('/api/user', userRouter)
+app.use('/api/chat',chatRouter)
+app.use('/api/message',messageRouter)
+app.use('/api/credit',creditRouter)
+
+
+const PORT = process.env.PORT || 3000
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`)
+})
+</file>
+
+<file path="vercel.json">
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "server.js",
+            "use": "@vercel/node",
+            "config": {
+                "includeFiles": [
+                    "dist/**"
+                ]
+            }
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "server.js"
+        }
+    ]
+}
+</file>
+
+</files>
