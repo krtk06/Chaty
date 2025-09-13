@@ -9,27 +9,27 @@ import Delete from '../icons/Delete';
 import toast from 'react-hot-toast';
 
 const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
-  const { chats, setSelectedChat, theme, setTheme, user, navigate, createNewChat, axios, setChats, fetchUsersChats, setToken, token} = useAppContext()
+  const { chats, setSelectedChat, theme, setTheme, user, navigate, createNewChat, axios, setChats, fetchUsersChats, setToken, token } = useAppContext()
 
   const [search, setSearch] = useState('')
 
 
-  const logout = () =>{
+  const logout = () => {
     localStorage.removeItem('token')
     setToken(null)
     toast.success('Logged out successfully')
   }
 
 
-  const deleteChat = async(e,chatId) => {
+  const deleteChat = async (e, chatId) => {
     try {
       e.stopPropagation()
       const confirm = window.confirm('Are you sure want to delete this chat? ')
-      if(!confirm){
+      if (!confirm) {
         return
       }
-      const {data} = await axios.post('api/chat/delete', {chatId}, {headers: {Authorization: token}})
-      if(data.success){
+      const { data } = await axios.post('api/chat/delete', { chatId }, { headers: { Authorization: token } })
+      if (data.success) {
         setChats(prev => prev.filter(chat => chat._id !== chatId))
         await fetchUsersChats()
         toast.success(data.message)
@@ -41,13 +41,15 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
 
   return (
     <div className={`flex flex-col h-screen min-w-72 p-5 dark:bg-gradient-to-b dark:from-[#141414] dark:to-[#000000] border-r border-[#80609f]/30  backdrop-blur-3xl transition-all duration-500 max-md:absolute left-0 z-1 ${!isMenuOpen && 'max-md:-translate-x-full'}`}>
+      <a href='/' className='w-auto h-17 max-w-48 object-contain'>
+        <img
+          src={theme === 'dark' ? assets.my_logo1 : assets.my_logo2}
+          alt="Logo"
+          className="w-auto h-17 max-w-48 object-contain"
+        />
+      </a>
 
-      <img
-        src={theme === 'dark' ? assets.my_logo1 : assets.my_logo2}
-        alt="Logo"
-        className="w-auto h-17 max-w-48 object-contain"
-      />
-      
+
       <button onClick={createNewChat} className="flex justify-center items-center w-full py-2 mt-10 bg-[#313131]/30 not-dark:bg-[#141414] text-white rounded-md text-sm cursor-pointer">
         <span className="mr-2 text-xl">+</span>
         New Chat
@@ -91,7 +93,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
                       {moment(chat.updatedAt).fromNow()}
                     </p>
                   </div>
-                  <Delete onClick={e=> toast.promise(deleteChat(e,chat._id),{loading: 'Deleting...'})} className="hidden group-hover:block w-4 cursor-pointer not-dark:invert"/>
+                  <Delete onClick={e => toast.promise(deleteChat(e, chat._id), { loading: 'Deleting...' })} className="hidden group-hover:block w-4 cursor-pointer not-dark:invert" />
                 </div>
               ))
             }
@@ -103,7 +105,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
         className="flex items-center gap-2 p-3 mt-4 border border-gray-300 dark:border-white/15 rounded-md cursor-pointer hover:scale-103 transition-all"
         onClick={() => { navigate('/community'); setIsMenuOpen(false) }}
       >
-        <Album className="w-4.5 not-dark:invert"/>
+        <Album className="w-4.5 not-dark:invert" />
         <div className="flex flex-col text-sm">
           <p className="text-sm">Community Images</p>
         </div>
@@ -113,7 +115,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
         className="flex items-center gap-2 p-3 mt-4 border border-gray-300 dark:border-white/15 rounded-md cursor-pointer hover:scale-103 transition-all"
         onClick={() => { navigate('/credits'); setIsMenuOpen(false) }}
       >
-        <Flame className="w-5 invert-0 not-dark:invert"/>
+        <Flame className="w-5 invert-0 not-dark:invert" />
         <div className="flex flex-col text-sm">
           <p className="text-sm">Credits: {user?.credits}</p>
           <p className="text-xs text-gray-400">Purchase credits to use Chaty</p>
@@ -135,7 +137,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
       <div
         className="flex items-center gap-3 p-3 mt-4 border border-gray-300 dark:border-white/15 rounded-md cursor-pointer hover:scale-103 transition-all group"
       >
-        <User className="w-4 not-dark:invert"/>
+        <User className="w-4 not-dark:invert" />
         <p className='flex-1 text-sm dark:text-white truncate'>{user ? user.name : 'Login your account'}</p>
         {user && <img onClick={logout} src={assets.logout_icon} className='h-5 cursor-pointer hidden not-dark:invert group-hover:block' />}
 
