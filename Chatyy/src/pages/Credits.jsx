@@ -3,18 +3,47 @@ import { useAppContext } from '../context/AppContext'
 import { assets, dummyPlans } from '../assets/assets'
 import Loading from './Loading'
 import Flame from '../icons/Credits'
+import toast from 'react-hot-toast'
 
 
 const Credits = () => {
   const { user } = useAppContext()
   const [plans, setPlans] = useState([])
   const [loading, setLoading] = useState(true)
+  const { axios, token } = useAppContext()
+
 
 
   const fetchPlans = async () => {
-    setPlans(dummyPlans)
+    try {
+      const { data } = await axios.get('/api/credit/plan', {
+        headers: { Authorization: token }
+      })
+      if (data.success) {
+        setPlans(data.plans)
+      } else {
+        toast.error(data.message || 'Failed to fetch plans.')
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
     setLoading(false)
   }
+
+
+  const purchasePlan = async (planId) => {
+    try {
+      const { data } = await axios.post('/api/credit/purchase', { planId }, { headers: { Authorization: token } })
+      if (data.success) {
+        window.location.href = data.url
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
+  }
+
 
 
   useEffect(() => {
@@ -64,11 +93,11 @@ const Credits = () => {
                   <span>{' '}/ {plan.credits} credits </span>
                 </p>
                 <ul className='list-disc list-inside text-sm text-gray-700 dark:text-purple-200 space-y-1'>
-                  {plan.features.map((feature,index) =>(
+                  {plan.features.map((feature, index) => (
                     <li key={index}>{feature}</li>
                   ))}
                 </ul>
-              <button className='mt-6 bg-blue-700 dark:bg-blue-800/70 hover:bg-blue-500 active:bg-blue-800 text-white font-medium py-2 rounded transition-colors cursor-pointer '>Buy Now</button>
+                <button onClick={()=>toast.promise(purchasePlan(plan._id),{loading: 'Processing..'})} className='mt-6 bg-blue-700 dark:bg-blue-800/70 hover:bg-blue-500 active:bg-blue-800 text-white font-medium py-2 rounded transition-colors cursor-pointer '>Buy Now</button>
               </div>
             ))}
           </div>
