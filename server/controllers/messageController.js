@@ -66,7 +66,6 @@ export const imageMessageController = async (req,res) =>{
 
         const generatedImageUrl = `${process.env.IMAGEKIT_URL_ENDPOINT}/ik-genimg-prompt-${encodedPrompt}/Chaty/${Date.now()}.png?tr=w-800,h-800`;
         const aiImageResponse = await axios.get(generatedImageUrl, { responseType: "arraybuffer" });
-        await axios.get(generatedImageUrl,{responseType:"arraybuffer"})
 
         const base64Image = `data:image/png;base64,${Buffer.from(aiImageResponse.data,"binary").toString('base64')}`
 
