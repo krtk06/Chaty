@@ -3,60 +3,73 @@ import { useAppContext } from '../context/AppContext'
 import Message from './Message'
 import { assets } from '../assets/assets'
 import SendIcon from '../icons/SendIcon'
+import toast from 'react-hot-toast'
 
 const ChatBox = () => {
-  const { selectedChat, user, chats, setChats, setSelectedChat } = useAppContext()
+  const { selectedChat, user, chats, setChats, setSelectedChat, axios, token, setUser } = useAppContext()
   const [input, setInput] = useState('')
   const [mode, setMode] = useState('text')
   const [isPublic, setIsPublic] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [messages,setMessages] = useState([])
+  const [messages, setMessages] = useState([])
   const containerRef = useRef(null)
+  const [prompt, setPromt] = useState('')
 
-  useEffect(() => {
-    if(selectedChat){
-      sendMessage(selectedChat.messages)
-    }
-  },[selectedChat])
 
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    sendMessage()
-  }  
+    if (!user) return toast('Login to send message')
+    if (!input.trim()) return
+    setLoading(true)
+    const inputCopy = input
+    setInput('')
+    setMessages(prev => [...prev, { role: 'user', content: inputCopy, timestamp: Date.now(), isImage: false }])
+
+    try {
+      const { data } = await axios.post(
+        `/api/message/${mode}`,
+        { chatId: selectedChat._id, prompt: inputCopy, isPublic },
+        { headers: { Authorization: token } }
+      )
+      if (data.success) {
+        setMessages(prev => [...prev, data.reply])
+        if (mode === 'image') {
+          setUser(prev => ({ ...prev, credits: prev.credits - 2 }))
+        } else {
+          setUser(prev => ({ ...prev, credits: prev.credits - 1 }))
+        }
+      } else {
+        toast.error(data.message)
+        setInput(inputCopy)
+      }
+    } catch (error) {
+      toast.error(error.message)
+      setInput(inputCopy)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    if(containerRef.current){
+    if (selectedChat) {
+      setMessages(selectedChat.messages)
+    }
+  }, [selectedChat])
+
+  useEffect(() => {
+    if (containerRef.current) {
       containerRef.current.scrollTo({
         top: containerRef.current.scrollHeight,
-        behavior: "smooth",
+        behavior: 'smooth',
       })
     }
-  },[messages])
-
-  const sendMessage = async () => {
-    if (!input.trim()) return
-
-    const newMessage = {
-      id: Date.now(),
-      content: input,
-      sender: 'user',
-      timestamp: new Date().toISOString()
-    }
-
-    const updatedChat = {
-      ...selectedChat,
-      messages: [...(selectedChat?.messages || []), newMessage]
-    }
-
-    setSelectedChat(updatedChat)
-    setInput('')
-    setLoading(true)
-  }
+  }, [messages])
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      sendMessage()
+      handleSubmit(e)
     }
   }
 
@@ -75,8 +88,8 @@ const ChatBox = () => {
 
   return (
     <div className="flex-1 flex flex-col justify-between m-5 md:m-10  max-md:mt-14 2xl:pr-40  ">
-      <div ref = {containerRef}
-      className="flex-1 overflow-y-scroll mb-5">
+      <div ref={containerRef}
+        className="flex-1 overflow-y-scroll mb-5">
         {selectedChat.messages && selectedChat.messages.length > 0 ? (
           selectedChat.messages.map((message) => (
             <Message key={message.id} message={message} />
@@ -106,27 +119,27 @@ const ChatBox = () => {
       </div>
 
       {mode === 'image' && (
-        <label className = 'inline-flex items-center gap-2 mb-3 text-sm mx-auto'>
+        <label className='inline-flex items-center gap-2 mb-3 text-sm mx-auto'>
           <p className='text-xs'>Publish Generated Image to Community</p>
-          <input type='checkbox' className='cursor-pointer' checked = {isPublic}
-                 onChange={(e)=>setIsPublic(e.target.checked)}></input>
+          <input type='checkbox' className='cursor-pointer' checked={isPublic}
+            onChange={(e) => setIsPublic(e.target.checked)}></input>
         </label>
       )}
-      <form onClick={handleSubmit}
-      className="bg-primary/20 dark:bg-[#202020]/30 border border-primary dark:border-[#313131]/30 rounded-full w-full max-w-2xl p-3 pl-4 mx-auto flex gap-4 items-center">
-          <select onChange={(e) => setMode(e.target.value)} value={mode}
+      <form onSubmit={handleSubmit}
+        className="bg-primary/20 dark:bg-[#202020]/30 border border-primary dark:border-[#313131]/30 rounded-full w-full max-w-2xl p-3 pl-4 mx-auto flex gap-4 items-center">
+        <select onChange={(e) => setMode(e.target.value)} value={mode}
           className='text-sm pl-3 pr-2 outline-none'>
-            <option className='dark:bg-[#404040]' value='text'>Text</option>
-            <option className='dark:bg-[#404040]' value='image'>Image</option>
-          </select>
-          <input onChange={(e) => setInput(e.target.value)} 
-                 value={input} 
-                 type='text' 
-                 placeholder='Ask me anything....'
-                 className='flex-1 w-full text-sm outline-none' required></input>
-                 <button disabled={loading}>
-                  <SendIcon className='w-8 cursor-pointer'/>
-                 </button>
+          <option className='dark:bg-[#404040]' value='text'>Text</option>
+          <option className='dark:bg-[#404040]' value='image'>Image</option>
+        </select>
+        <input onChange={(e) => setInput(e.target.value)}
+          value={input}
+          type='text'
+          placeholder='Ask me anything....'
+          className='flex-1 w-full text-sm outline-none' required></input>
+        <button disabled={loading}>
+          <SendIcon className='w-8 cursor-pointer' />
+        </button>
       </form>
     </div>
   )
