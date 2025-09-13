@@ -7,11 +7,23 @@ const Community = () => {
   const { user } = useAppContext()
   const [images, setImages] = useState([])
   const [loading,setLoading] = useState(true)
+  const {axios} = useAppContext()
 
-  const fetchImages = async() =>{
-    setImages(dummyPublishedImages)
-    setLoading(false)
+
+ const fetchImages = async () => {
+  try {
+    const { data } = await axios.get('/api/user/published-images')
+    if (data.success) {
+      setImages(data.images)
+    } else {
+      toast.error(data.message)
+    }
+  } catch (error) {
+    toast.error(error.message)
   }
+  setLoading(false)
+}
+
 
   useEffect(() =>{
     fetchImages()
