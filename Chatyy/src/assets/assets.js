@@ -18,19 +18,7 @@ import logo_light from './Chatylogo-dark.png'
 import logo_dark from './Chatylogo-light.png'
 import my_logo1 from './Chatylogo-light-removebg.png'
 import my_logo2 from './Chatylogo-dark-removebg.png'
-
-import ai_image1 from "./ai_image1.jpg";
-import ai_image2 from "./ai_image2.jpg";
-import ai_image3 from "./ai_image3.jpg";
-import ai_image4 from "./ai_image4.jpg";
-import ai_image5 from "./ai_image5.jpg";
-import ai_image6 from "./ai_image6.jpg";
-import ai_image7 from "./ai_image7.jpg";
-import ai_image8 from "./ai_image8.jpg";
-import ai_image9 from "./ai_image9.jpg";
-import ai_image10 from "./ai_image10.jpg";
-import ai_image11 from "./ai_image11.jpg";
-import ai_image12 from "./ai_image12.jpg";
+import favicon_logo from 'favicon_logo_chaty3.png'
 
 export const assets = {
     logo,
@@ -52,7 +40,8 @@ export const assets = {
     logo_light,
     logo_dark,
     my_logo1,
-    my_logo2
+    my_logo2,
+    favicon_logo
 };
 
 export const dummyUserData = {
@@ -63,7 +52,6 @@ export const dummyUserData = {
     "credits": 200,
 }
 
-// copy for server controllers
 export const dummyPlans = [
     {
         _id: "basic",
