@@ -18,7 +18,6 @@ import logo_light from './Chatylogo-dark.png'
 import logo_dark from './Chatylogo-light.png'
 import my_logo1 from './Chatylogo-light-removebg.png'
 import my_logo2 from './Chatylogo-dark-removebg.png'
-import favicon_logo from 'favicon_logo_chaty3.png'
 
 export const assets = {
     logo,
@@ -40,8 +39,7 @@ export const assets = {
     logo_light,
     logo_dark,
     my_logo1,
-    my_logo2,
-    favicon_logo
+    my_logo2
 };
 
 export const dummyUserData = {
