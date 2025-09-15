@@ -40,7 +40,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
   }
 
   return (
-    <div className={`flex flex-col h-screen min-w-72 p-5 dark:bg-gradient-to-b dark:from-[#141414] dark:to-[#000000] border-r border-[#80609f]/30  backdrop-blur-3xl transition-all duration-500 max-md:absolute left-0 z-1 ${!isMenuOpen && 'max-md:-translate-x-full'}`}>
+    <div className={`flex flex-col h-screen min-w-72 p-5 overflow-y-auto dark:bg-gradient-to-b dark:from-[#141414] dark:to-[#000000] border-r border-[#80609f]/30  backdrop-blur-3xl transition-all duration-500 max-md:absolute left-0 z-1 ${!isMenuOpen && 'max-md:-translate-x-full'}`}>
       <a href='/' className='w-auto h-17 max-w-48 object-contain'>
         <img
           src={theme === 'dark' ? assets.my_logo1 : assets.my_logo2}
