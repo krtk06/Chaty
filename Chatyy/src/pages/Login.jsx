@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState } from 'react'
 import { useAppContext } from '../context/AppContext';
 import toast from 'react-hot-toast';
-import './App.css'
+import '../App.css'
 import Left from '../Left';
 
 function Login() {
@@ -9,32 +9,21 @@ function Login() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const {axios, setToken} = useAppContext()
-    
+    const { axios, setToken } = useAppContext()
+
     const [showPassword, setShowPassword] = useState(false);
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
-    const containerRef = useRef(null)
 
-    useEffect(() => {
-        const handleMouseMove = (e) => {
-            setMousePos({ x: e.clientX, y: e.clientY })
-        }
-
-        window.addEventListener('mousemove', handleMouseMove)
-        return () => window.removeEventListener('mousemove', handleMouseMove)
-    }, [])
-
-    const handleSubmit = async(e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const url = state === "login" ? '/api/user/login' : '/api/user/register'
 
         try {
-            const {data} = await axios.post(url, {name, email, password})
+            const { data } = await axios.post(url, { name, email, password })
 
-            if(data.success){
+            if (data.success) {
                 setToken(data.token)
                 localStorage.setItem('token', data.token)
-            }else{
+            } else {
                 toast.error(data.message)
             }
         } catch (error) {
@@ -46,55 +35,11 @@ function Login() {
         setShowPassword(!showPassword);
     }
 
-    const Eye = ({ x, y, size = 20 }) => {
-        const eyeRef = useRef(null)
-        const [pupilPos, setPupilPos] = useState({ x: 0, y: 0 })
-
-        useEffect(() => {
-            if (eyeRef.current) {
-                const rect = eyeRef.current.getBoundingClientRect()
-                const eyeCenterX = rect.left + rect.width / 2
-                const eyeCenterY = rect.top + rect.height / 2
-                
-                const angle = Math.atan2(mousePos.y - eyeCenterY, mousePos.x - eyeCenterX)
-                const distance = Math.min(6, Math.hypot(mousePos.x - eyeCenterX, mousePos.y - eyeCenterY) / 50)
-                
-                setPupilPos({
-                    x: Math.cos(angle) * distance,
-                    y: Math.sin(angle) * distance
-                })
-            }
-        }, [mousePos, x, y, size])
-
-        return (
-            <div
-                ref={eyeRef}
-                className="absolute rounded-full bg-white flex items-center justify-center "
-                style={{
-                    left: `${x}px`,
-                    top: `${y}px`,
-                    width: `${size}px`,
-                    height: `${size}px`
-                }}
-            >
-                <div
-                    className="rounded-full bg-black"
-                    style={{
-                        width: `${size * 0.4}px`,
-                        height: `${size * 0.4}px`,
-                        transform: `translate(${pupilPos.x}px, ${pupilPos.y}px)`,
-                        transition: 'transform 0.3s ease-out'
-                    }}
-                />
-            </div>
-        )
-    }
-
     return (
         <>
             <div className="min-h-screen flex">
                 <div className="hidden lg:flex lg:w-1/2 bg-[#141414] items-center justify-center">
-                    <Left/>
+                    <Left />
                 </div>
                 <div className="w-full lg:w-1/2 bg-[#141414] flex items-center justify-center p-8">
                     <form onSubmit={handleSubmit} className="w-full max-w-md">
