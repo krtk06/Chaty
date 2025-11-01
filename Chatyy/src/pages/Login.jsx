@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useAppContext } from '../context/AppContext';
 import toast from 'react-hot-toast';
 import './App.css'
+import Left from '../Left';
 
 function Login() {
     const [state, setState] = useState("login");
@@ -93,118 +94,7 @@ function Login() {
         <>
             <div className="min-h-screen flex">
                 <div className="hidden lg:flex lg:w-1/2 bg-[#141414] items-center justify-center">
-                    <div
-                        ref={containerRef}
-                        className="w-full h-screen flex items-center justify-center overflow-hidden bg-[#141414]"
-                    >
-                        <div className="relative" style={{ width: '600px', height: '600px' }}>
-                            {/* #1E90FF */}
-                            <div
-                                className="absolute"
-                                style={{
-                                    left: '180px',
-                                    top: '100px',
-                                    width: '200px',
-                                    height: '350px',
-                                    backgroundColor: '#1E90FF',
-                                    borderRadius: '8px',
-                                    boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
-                                }}
-                            >
-                                <Eye x={40} y={50} size={24} />
-                                <Eye x={110} y={50} size={24} />
-                                <div
-                                    className="absolute bg-black"
-                                    style={{
-                                        left: '70px',
-                                        top: '100px',
-                                        width: '40px',
-                                        height: '8px',
-                                        borderRadius: '4px'
-                                    }}
-                                />
-                            </div>
-
-                            {/* #C0C0C0 */}
-                            <div
-                                className="absolute"
-                                style={{
-                                    left: '320px',
-                                    top: '220px',
-                                    width: '180px',
-                                    height: '280px',
-                                    backgroundColor: '#C0C0C0',
-                                    borderRadius: '8px',
-                                    boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
-                                }}
-                            >
-                                <Eye x={45} y={40} size={22} />
-                                <Eye x={105} y={40} size={22} />
-                            </div>
-
-                            {/* #004D61*/}
-                            <div
-                                className="absolute"
-                                style={{
-                                    left: '80px',
-                                    top: '320px',
-                                    width: '240px',
-                                    height: '240px',
-                                    backgroundColor: '#004D61',
-                                    borderRadius: '120px 120px 0 0',
-                                    boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-                                    overflow: 'hidden'
-                                }}
-                            >
-                                <Eye x={50} y={80} size={20} />
-                                <Eye x={170} y={80} size={20} />
-                                <div
-                                    className="absolute bg-black"
-                                    style={{
-                                        left: '80px',
-                                        top: '130px',
-                                        width: '60px',
-                                        height: '40px',
-                                        borderRadius: '0 0 30px 30px'
-                                    }}
-                                />
-                            </div>
-
-                            {/* #FFEB3B*/}
-                            <div
-                                className="absolute"
-                                style={{
-                                    left: '420px',
-                                    top: '280px',
-                                    width: '140px',
-                                    height: '220px',
-                                    backgroundColor: '#FFEB3B',
-                                    borderRadius: '70px 70px 20px 20px',
-                                    boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
-                                }}
-                            >
-                                <div
-                                    className="absolute rounded-full bg-black"
-                                    style={{
-                                        left: '60px',
-                                        top: '50px',
-                                        width: '10px',
-                                        height: '10px'
-                                    }}
-                                />
-                                <div
-                                    className="absolute bg-black"
-                                    style={{
-                                        left: '30px',
-                                        top: '100px',
-                                        width: '80px',
-                                        height: '4px',
-                                        borderRadius: '2px'
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    </div>
+                    <Left/>
                 </div>
                 <div className="w-full lg:w-1/2 bg-[#141414] flex items-center justify-center p-8">
                     <form onSubmit={handleSubmit} className="w-full max-w-md">
