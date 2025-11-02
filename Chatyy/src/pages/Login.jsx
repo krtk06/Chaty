@@ -37,7 +37,7 @@ function Login() {
 
     return (
         <>
-            <div className="min-h-screen flex">
+            <div className="min-h-screen w-screen flex">
                 <div className="hidden lg:flex lg:w-1/2 bg-[#141414] items-center justify-center">
                     <Left />
                 </div>
