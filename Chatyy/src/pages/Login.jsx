@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useAppContext } from '../context/AppContext';
 import toast from 'react-hot-toast';
-import '../App.css'
+import '../index.css'
 import Left from '../components/Left';
 
 function Login() {
