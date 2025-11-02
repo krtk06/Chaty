@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useAppContext } from '../context/AppContext';
 import toast from 'react-hot-toast';
 import '../App.css'
-import Left from '../Left';
+import Left from '../components/Left';
 
 function Login() {
     const [state, setState] = useState("login");
