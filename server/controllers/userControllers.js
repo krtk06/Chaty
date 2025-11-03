@@ -2,7 +2,6 @@ import User from "../models/user.js";
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import Chat from "../models/Chat.js";
-import ImageKit from "imagekit";
 
 const generateToken = (id) =>{
     return jwt.sign({id},process.env.JWT_SECRET,{
@@ -42,7 +41,7 @@ export const loginUser = async (req,res) =>{
 
             if(isMatch){
                 const token = generateToken(user._id);
-                res.json({success:true, token})
+                return res.json({success:true, token})
             }
         }
 
@@ -67,6 +66,41 @@ export const getUser = async (req,res) =>{
 }
 
 
+
+export const updateUser = async (req, res) => {
+    const { name, email, currentPassword, newPassword, avatar } = req.body;
+
+    try {
+        const user = await User.findById(req.user._id);
+
+        if (name) user.name = name;
+        if (email) {
+            const existing = await User.findOne({ email, _id: { $ne: user._id } });
+            if (existing) {
+                return res.json({ success: false, message: "Email already in use" });
+            }
+            user.email = email;
+        }
+        if (avatar) user.avatar = avatar;
+
+        if (newPassword) {
+            if (!currentPassword) {
+                return res.json({ success: false, message: "Current password is required" });
+            }
+            const isMatch = await bcrypt.compare(currentPassword, user.password);
+            if (!isMatch) {
+                return res.json({ success: false, message: "Current password is incorrect" });
+            }
+            user.password = newPassword;
+        }
+
+        await user.save();
+
+        return res.json({ success: true, message: "Profile updated successfully", user });
+    } catch (error) {
+        return res.json({ success: false, message: error.message });
+    }
+}
 
 export const getPublishedImages = async (req,res) => {
     try {
