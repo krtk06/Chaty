@@ -13,9 +13,7 @@ const app = express()
 await connectDB()
 
 app.post('/api/stripe',express.raw({type: 'application/json'}),stripeWebhooks)
-app.use(express.json({ limit: '2mb' }));
-
-app.use(express.json())
+app.use(express.json({ limit: '2mb' }))
 app.use(cors())
 
 app.get('/', (req, res) => res.send('Server is Live!'))
