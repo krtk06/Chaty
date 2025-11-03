@@ -11,21 +11,19 @@
 ::-webkit-scrollbar{
   display: none;
 }
-
-@variants dark {
-  .dark * {
-    /* Dark mode styles */
-  }
+* {
+  scrollbar-width: none;
 }
+* {
+  -ms-overflow-style: none;
+}
+
 .reset-tw:not(pre):not(code){
   all:revert;
 }
-.logo-container {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 12px;
-  border-radius: 8px;
-  backdrop-filter: blur(10px);
+.dark .reset-tw:not(pre):not(code) {
+  color: #fff;
 }
+
+
 
