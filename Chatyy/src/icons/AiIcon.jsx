@@ -27,7 +27,7 @@ const bodyVariants = {
   },
 };
 
-const aiIcon = ({
+const AiIcon = ({
   width = 28,
   height = 28,
   strokeWidth = 2,
@@ -85,4 +85,4 @@ const aiIcon = ({
   );
 };
 
-export { aiIcon };
+export default AiIcon;
