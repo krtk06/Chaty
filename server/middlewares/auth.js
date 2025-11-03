@@ -3,7 +3,11 @@ import User from '../models/user.js';
 
 
 export const protect = async (req,res,next) => {
-    let token = req.headers.authorization;
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).json({success: false, message: "Not authorized, no token"})
+    }
+    const token = authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
 
     try {
         const decoded = jwt.verify(token,process.env.JWT_SECRET)
