@@ -20,7 +20,7 @@ export const textMessageController = async(req,res) =>{
         chat.messages.push({role: "user", content: prompt, timestamp : Date.now(), isImage:false})
 
         const {choices} = await openai.chat.completions.create({
-            model: "gemini-2.0-flash",
+            model: "mimo-v2.5",
             messages: [
                 {
                     role: "user",
