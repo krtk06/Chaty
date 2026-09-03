@@ -6,7 +6,7 @@ The backend API for Chaty, an AI chat application. It is a Node.js and Express s
 
 - Register and log in users, returns a JWT token.
 - Store chat history in MongoDB.
-- Send text prompts to the Gemini model through the OpenAI SDK.
+- Send text prompts to the MiMo model through the OpenAI SDK.
 - Generate AI images with ImageKit and host them on the ImageKit CDN.
 - Parse uploaded documents and answer questions about them.
 - Track credits for every user and deduct them per request.
@@ -22,7 +22,7 @@ The backend API for Chaty, an AI chat application. It is a Node.js and Express s
 - bcryptjs to hash passwords.
 - Stripe for payments and webhooks.
 - ImageKit for image generation and storage.
-- OpenAI SDK pointed at the Google Gemini API.
+- OpenAI SDK pointed at the OpenCode Go gateway.
 - Multer for handling file uploads.
 - pdfjs-dist, mammoth, and xlsx to extract text from documents.
 - cors and dotenv for the server setup.
@@ -37,7 +37,7 @@ server/
 ├── configs/
 │   ├── db.js              MongoDB connection
 │   ├── imageKit.js        ImageKit client
-│   └── openai.js          OpenAI client pointing at Gemini
+│   └── openai.js          OpenAI client pointing at OpenCode Go
 ├── controllers/
 │   ├── userControllers.js    Register, login, profile, published images
 │   ├── chatControllers.js    Create, list, delete chats
@@ -128,7 +128,7 @@ The check happens inside each message controller. If the balance is too low, the
 
 ### Text
 
-`textMessageController` checks the credit balance, appends the user prompt to the chat, and calls the Gemini model through `openai.js`. The model in use is `gemini-2.5-flash`. It uses a helper with retry logic that handles rate limits, waits at least 6 seconds between requests, and backs off with exponential delays on HTTP 429 responses. The reply is saved to the chat and 1 credit is deducted.
+`textMessageController` checks the credit balance, appends the user prompt to the chat, and calls the MiMo model through `openai.js`. The model in use is `mimo-v2.5`. The reply is saved to the chat and 1 credit is deducted.
 
 ### Image
 
@@ -176,7 +176,7 @@ Create a `.env` file in this folder.
 ```
 MONGODB_URL=mongodb+srv://...
 JWT_SECRET=your-secret
-GEMINI_API_KEY=your-gemini-key
+OPENCODE_API_KEY=your-opencode-go-key
 IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your-id
 IMAGEKIT_PUBLIC_KEY=your-public-key
 IMAGEKIT_PRIVATE_KEY=your-private-key
@@ -186,7 +186,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 PORT=3000
 ```
 
-The Gemini key is passed to the OpenAI SDK with the base URL `https://generativelanguage.googleapis.com/v1beta/openai/`, so a Gemini API key works with the OpenAI client.
+The OpenCode Go key is passed to the OpenAI SDK with the base URL `https://opencode.ai/zen/go/v1`, so an OpenCode Go subscription key works with the OpenAI client. The model `mimo-v2.5` is a Xiaomi MiMo V2.5 general purpose model with a 1,000,000 token context window and a 128,000 token output limit. It accepts text and image input and returns reasoning content.
 
 ## Run locally
 
