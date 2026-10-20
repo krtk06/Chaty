@@ -7,6 +7,8 @@ const ChatSchema = new mongoose.Schema({
     messages: [
         {
             isImage: {type: Boolean, required: true},
+            isDocument: {type: Boolean, default: false},
+            fileName: {type: String},
             isPublished: {type: Boolean, default: false},
             role: {type: String, required: true},
             content: {type: String, required: true},
@@ -18,4 +20,4 @@ const ChatSchema = new mongoose.Schema({
 
 const Chat = mongoose.model('Chat', ChatSchema)
 
-export default Chat;
+export default Chat

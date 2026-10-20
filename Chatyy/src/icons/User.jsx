@@ -1,5 +1,4 @@
-import React from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { motion as Motion, useAnimation } from 'motion/react';
 
 const pathVariant = {
   normal: { pathLength: 1, opacity: 1, pathOffset: 0 },
@@ -57,14 +56,14 @@ const User = ({
         strokeLinejoin="round"
         {...props}
       >
-        <motion.circle
+        <Motion.circle
           cx="12"
           cy="8"
           r="5"
           animate={controls}
           variants={circleVariant}
         />
-        <motion.path
+        <Motion.path
           d="M20 21a8 8 0 0 0-16 0"
           variants={pathVariant}
           transition={{

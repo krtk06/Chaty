@@ -17,12 +17,17 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "google-auth-library": "^11.0.2",
     "imagekit": "^6.0.0",
     "jsonwebtoken": "^9.0.2",
+    "mammoth": "^1.13.0",
     "mongoose": "^8.18.0",
+    "multer": "^2.4.0",
     "openai": "^5.19.1",
+    "pdfjs-dist": "^6.4.299",
     "stripe": "^18.5.0",
-    "svix": "^1.76.1"
+    "svix": "^1.76.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

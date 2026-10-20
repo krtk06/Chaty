@@ -132,7 +132,15 @@ The check happens inside each message controller. If the balance is too low, the
 
 ### Image
 
-`imageMessageController` checks for 2 credits, saves the prompt, builds an ImageKit generation URL from the prompt, downloads the generated PNG, uploads it to the `Chaty` folder in ImageKit, and stores the returned URL in the chat. If the prompt was marked as published, the image appears in the community feed.
+`imageMessageController` checks for 2 credits, generates the image, uploads it to the `Chaty` folder in ImageKit, and stores the returned URL in the chat. If the prompt was marked as published, the image appears in the community feed.
+
+Image generation is provider based. `utils/imageProviders.js` tries the configured providers in order and returns the first successful image:
+
+1. **ImageKit** - AI generation through the account's `ik-genimg-prompt` URL. ImageKit renders asynchronously, so the first request is given up to 45 seconds and later polls are short.
+2. **Google Gemini** - `generateContent` with `responseModalities: ["TEXT", "IMAGE"]`, using the models in `GEMINI_IMAGE_MODELS`.
+3. **OpenAI** - the images API (`gpt-image-1` by default).
+
+Set `IMAGE_PROVIDER=auto` (default) to use the whole chain, or pin a single provider with `imagekit`, `gemini` or `openai`. Providers without credentials are skipped. When a provider is out of quota the request fails fast with a clear message and the credits are refunded - use `ImageKit > Usage` (or the provider dashboard) to check the remaining allowance.
 
 ### Document
 
@@ -153,7 +161,7 @@ Any other MIME type throws an unsupported file error.
 
 `creditController.js` defines three plans: Basic (10 USD, 100 credits), Pro (20 USD, 500 credits), and Premium (30 USD, 1000 credits). `purchasePlans` creates a `Transaction` record marked as unpaid, then creates a Stripe checkout session with the plan as the line item. The success URL points to `/loading` and the cancel URL points to the home page. The session carries the transaction id and the app id in its metadata.
 
-`webhooks.js` listens for the `payment_intent.succeeded` event. It looks up the checkout session by payment intent, reads the transaction id from the metadata, verifies the app id matches `Chaty`, finds the unpaid transaction, adds its credits to the user, and marks it as paid. Events from other apps are ignored.
+`webhooks.js` listens for the `checkout.session.completed` and `payment_intent.succeeded` events. It reads the transaction id from the session metadata, verifies the app id matches `Chaty`, finds the unpaid transaction, adds its credits to the user, and marks it as paid. Missing, foreign, or already-paid sessions are acknowledged and ignored, so Stripe does not retry them forever.
 
 ## Models
 
@@ -186,7 +194,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 PORT=3000
 ```
 
-The OpenCode Go key is passed to the OpenAI SDK with the base URL `https://opencode.ai/zen/go/v1`, so an OpenCode Go subscription key works with the OpenAI client. The model `mimo-v2.5` is a Xiaomi MiMo V2.5 general purpose model with a 1,000,000 token context window and a 128,000 token output limit. It accepts text and image input and returns reasoning content.
+The OpenCode Go key is passed to the OpenAI SDK with the base URL `https://opencode.ai/inference/go/openai/v1`, so an OpenCode Go subscription key works with the OpenAI client. One caveat: OpenCode Go keys expire. If the model calls start failing with a 401, create a new key in the OpenCode Console and replace `OPENCODE_API_KEY`. Requests identify themselves with a `Chatyy/1.0` user agent and a per-chat `x-opencode-session` header, as OpenCode Go asks clients to do. `OPENAI_BASE_URL` can override the endpoint if needed. The model `mimo-v2.5` is a Xiaomi MiMo V2.5 general purpose model with a 1,000,000 token context window and a 128,000 token output limit. It accepts text and image input and returns reasoning content.
 
 ## Run locally
 

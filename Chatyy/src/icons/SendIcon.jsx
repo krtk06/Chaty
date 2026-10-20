@@ -1,5 +1,4 @@
-import React from 'react';
-import { motion, useAnimation } from 'motion/react';
+import { motion as Motion, useAnimation } from 'motion/react';
 
 const chevronVariants = {
   normal: {
@@ -50,7 +49,7 @@ const SendIcon = ({
         strokeLinejoin="round"
         {...props}
       >
-        <motion.path
+        <Motion.path
           d="m9 18 6-6-6-6"
           variants={chevronVariants}
           animate={controls}

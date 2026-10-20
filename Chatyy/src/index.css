@@ -1,31 +1,116 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark,.dark *));
-*{
-  font-family: "Outfit", sans-serif;
-}
-@theme{
-  --color-primary: #141414;
-}
-::-webkit-scrollbar{
-  display: none;
+
+@font-face {
+  font-family: "Grandover";
+  src: url("/fonts/grandover-regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
-@variants dark {
-  .dark * {
-    /* Dark mode styles */
+@theme {
+  --color-base: #050505;
+  --color-panel: #0a0a0a;
+  --color-accent: #fc7819;
+  --color-paper: #faf8f3;
+  --color-cream: #f4f2ec;
+  --color-ink: #1c1917;
+  --color-coal: #12100d;
+  --color-ember: #1c1813;
+  --radius-card: 10px;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-editorial: Georgia, "Times New Roman", serif;
+  --font-logo: "Grandover", ui-sans-serif, system-ui, sans-serif;
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+  --animate-marquee: marquee 26s linear infinite;
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(250%); }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
   }
 }
-.reset-tw:not(pre):not(code){
-  all:revert;
-}
-.logo-container {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 12px;
-  border-radius: 8px;
-  backdrop-filter: blur(10px);
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+  }
 }
 
+html {
+  -webkit-font-smoothing: antialiased;
+  font-synthesis: none;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.dark body {
+  background-color: var(--color-coal);
+  color: #f5f1e8;
+}
+
+::selection {
+  background: #fc7819;
+  color: #1c1917;
+}
+
+.dark ::selection {
+  background: #fc7819;
+  color: #12100d;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(0 0 0 / 0.2);
+  border-radius: 8px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 0.15);
+  border-radius: 8px;
+}
+
+:focus-visible {
+  outline: 2px solid #fc7819;
+  outline-offset: 2px;
+}
+
+input:focus-visible,
+textarea:focus-visible {
+  outline: none;
+}
+
+input, textarea {
+  caret-color: #fc7819;
+}
+
+button {
+  touch-action: manipulation;
+}
+
+.reset-tw:not(pre):not(code) {
+  all: revert;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

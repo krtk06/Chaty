@@ -14,7 +14,8 @@ export const createChat = async (req,res) =>{
         }
 
         await Chat.create(chatData)
-        res.json({success: true, message: "Chat Created"})
+        const chat = await Chat.findOne({ userId }).sort({ createdAt: -1 })
+        res.json({success: true, message: "Chat Created", chat})
     } catch (error) {
         res.json({success: false, message: error.message})
     }

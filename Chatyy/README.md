@@ -25,9 +25,8 @@ The frontend web app for Chaty, an AI chat application. It is a React single pag
 - react-hot-toast for notifications.
 - Moment.js to show message timestamps.
 - Motion for UI animations.
-- Three.js for the animated 3D background on the loading page.
+- @paper-design/shaders-react for the GrainGradient backdrop on the login page.
 - clsx and tailwind-merge for conditional class names.
-- animate-ui components for the animated sidebar icon and other primitives.
 
 ## Folder structure
 
@@ -47,18 +46,21 @@ Chatyy/
 │   │   ├── prism.css       Prism theme used for code blocks
 │   │   └── ...             PNG, JPG, and SVG files
 │   ├── components/
-│   │   ├── ChatBox.jsx     Chat screen, prompt input, text and image modes
+│   │   ├── ChatBox.jsx     Chat screen, prompt input, text/image/document modes
 │   │   ├── Message.jsx     Renders a single user or AI message
 │   │   ├── Sidebar.jsx     Chat list, new chat, logout, navigation
-│   │   ├── fluid.jsx       3D fluid background used on the loading page
-│   │   └── animate-ui/     Motion primitives and icons
+│   │   ├── Logo.jsx        Wordmark and mark
+│   │   └── chat/           Composer, empty hero, streaming text, thinking pulse
 │   ├── context/
 │   │   └── AppContext.jsx  Global state, user, chats, theme, axios client
-│   ├── hooks/
-│   │   └── use-is-in-view.jsx  In view observer hook
 │   ├── icons/              Inline SVG icon components
 │   ├── lib/
+│   │   ├── socialAuth.js   Google / Apple sign-in helpers
+│   │   ├── timeAgo.js      Relative time formatting
 │   │   └── utils.js        Shared class name helper
+│   ├── content/
+│   │   ├── terms.js        Terms & Conditions copy
+│   │   └── privacy.js      Privacy Policy copy
 │   └── pages/
 │       ├── Login.jsx       Login and signup form
 │       ├── Loading.jsx     Loading screen after a purchase
@@ -89,6 +91,8 @@ Chatyy/
 - `/credits` for credit plans.
 - `/settings` for profile settings.
 - `/login` for the login page.
+- `/terms` and `/privacy` for the legal pages (available signed in or signed out).
+- Any unknown path renders the custom 404 page.
 
 ## Chat screen
 
@@ -109,7 +113,7 @@ The credits page loads the plans from `/api/credit/plan`. Clicking a plan calls 
 Create a `.env` file in this folder.
 
 ```
-VITE_SERVER_URL=http://localhost:3000
+VITE_SERVER_URL=http://localhost:3001
 ```
 
 This is the base URL of the backend API. Every Axios call is relative to this value.

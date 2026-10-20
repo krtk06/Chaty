@@ -1,5 +1,4 @@
-import React from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { motion as Motion, useAnimation } from 'motion/react';
 
 const pathVariants = {
   normal: {
@@ -52,7 +51,7 @@ const Flame = ({
         strokeLinejoin="round"
         {...props}
       >
-        <motion.path
+        <Motion.path
           variants={pathVariants}
           initial="normal"
           animate={controls}

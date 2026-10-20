@@ -1,5 +1,4 @@
-import React from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { motion as Motion, useAnimation } from 'motion/react';
 
 const lidVariants = {
   normal: { y: 0 },
@@ -46,15 +45,15 @@ const Delete = ({
         strokeLinejoin="round"
         {...props}
       >
-        <motion.g
+        <Motion.g
           variants={lidVariants}
           animate={controls}
           transition={springTransition}
         >
           <path d="M3 6h18" />
           <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-        </motion.g>
-        <motion.path
+        </Motion.g>
+        <Motion.path
           d="M19 8v12c0 1-1 2-2 2H7c-1 0-2-1-2-2V8"
           variants={{
             normal: { d: "M19 8v12c0 1-1 2-2 2H7c-1 0-2-1-2-2V8" },
@@ -63,30 +62,21 @@ const Delete = ({
           animate={controls}
           transition={springTransition}
         />
-        <motion.line
-          x1="10"
-          x2="10"
-          y1="11"
-          y2="17"
-          variants={{
-            normal: { y1: 11, y2: 17 },
-            animate: { y1: 11.5, y2: 17.5 },
-          }}
-          animate={controls}
-          transition={springTransition}
-        />
-        <motion.line
-          x1="14"
-          x2="14"
-          y1="11"
-          y2="17"
-          variants={{
-            normal: { y1: 11, y2: 17 },
-            animate: { y1: 11.5, y2: 17.5 },
-          }}
-          animate={controls}
-          transition={springTransition}
-        />
+        {[10, 14].map((x) => (
+          <Motion.line
+            key={x}
+            x1={x}
+            x2={x}
+            y1="11"
+            y2="17"
+            variants={{
+              normal: { y1: 11, y2: 17 },
+              animate: { y1: 11.5, y2: 17.5 },
+            }}
+            animate={controls}
+            transition={springTransition}
+          />
+        ))}
       </svg>
     </div>
   );

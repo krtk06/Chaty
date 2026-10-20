@@ -34,7 +34,16 @@ export const getPlans = async (req, res) => {
     }
 }
 
-const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY);
+let stripeClient = null
+
+const getStripe = () => {
+    if (!stripeClient) {
+        const key = process.env.STRIPE_PRIVATE_KEY
+        if (!key) throw new Error('Stripe is not configured (STRIPE_PRIVATE_KEY missing)')
+        stripeClient = new Stripe(key)
+    }
+    return stripeClient
+}
 
 
 export const purchasePlans = async (req, res) => {
@@ -55,7 +64,8 @@ export const purchasePlans = async (req, res) => {
             isPaid: false
         })
 
-        const {origin} = req.headers;
+        const origin = req.headers.origin || process.env.CLIENT_URL || 'http://localhost:5173';
+        const stripe = getStripe()
 
         const session = await stripe.checkout.sessions.create({
             line_items: [
@@ -74,7 +84,9 @@ export const purchasePlans = async (req, res) => {
             success_url: `${origin}/loading`,
             cancel_url: `${origin}`,
             metadata: {transactionId: transaction._id.toString(), appId: 'Chaty'},
-            expires_at: Math.floor(Date.now() /1000) + 30 * 60,
+            // Stripe requires at least 30 minutes; keep a safety margin for
+            // the round trip so the boundary is never hit.
+            expires_at: Math.floor(Date.now() /1000) + 31 * 60,
         });
 
         res.json({success: true,url: session.url})

@@ -1,5 +1,4 @@
-import React from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { motion as Motion, useAnimation } from 'motion/react';
 
 const bookmarkVariants = {
   normal: {
@@ -53,7 +52,7 @@ const Album = ({
         {...props}
       >
         <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-        <motion.path
+        <Motion.path
           d="M11 3 L11 11 L14 8 L17 11 L17 3"
           variants={bookmarkVariants}
           animate={controls}

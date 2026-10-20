@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useAnimation } from "framer-motion";
+import { motion as Motion, useAnimation } from "motion/react";
 
 const defaultTransition = {
   type: "spring",
@@ -42,26 +42,22 @@ const LogoIcon = ({
         strokeLinejoin="round"
         {...props}
       >
-        <motion.path
-          variants={{
-            normal: { translateX: "0%" },
-            animate: { translateX: "2px" },
-          }}
-          transition={defaultTransition}
-          animate={controls}
-          initial="normal"
-          d="m17 18-6-6 6-6"
-        />
-        <motion.path
-          variants={{
-            normal: { translateX: "0%" },
-            animate: { translateX: "-2px" },
-          }}
-          transition={defaultTransition}
-          animate={controls}
-          initial="normal"
-          d="M7 6v12"
-        />
+        {[
+          { d: "m17 18-6-6 6-6", shift: "2px" },
+          { d: "M7 6v12", shift: "-2px" },
+        ].map((path) => (
+          <Motion.path
+            key={path.d}
+            variants={{
+              normal: { translateX: "0%" },
+              animate: { translateX: path.shift },
+            }}
+            transition={defaultTransition}
+            animate={controls}
+            initial="normal"
+            d={path.d}
+          />
+        ))}
       </svg>
     </div>
   );
